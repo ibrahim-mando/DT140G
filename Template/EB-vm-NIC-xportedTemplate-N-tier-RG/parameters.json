@@ -1,0 +1,21 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "networkInterfaces_business_vm1490_name": {
+            "value": null
+        },
+        "publicIPAddresses_Business_vm1_ip_externalid": {
+            "value": null
+        },
+        "virtualNetworks_N_tier_vnet_externalid": {
+            "value": null
+        },
+        "loadBalancers_Business_loadBalancer_externalid": {
+            "value": null
+        },
+        "networkSecurityGroups_Business_tier_Nsg_externalid": {
+            "value": null
+        }
+    }
+}
