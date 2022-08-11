@@ -1,0 +1,21 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "networkInterfaces_web_vm1818_name": {
+            "value": null
+        },
+        "publicIPAddresses_we_vm1_pip_externalid": {
+            "value": null
+        },
+        "virtualNetworks_N_tier_vnet_externalid": {
+            "value": null
+        },
+        "applicationGateways_appGatw_externalid": {
+            "value": null
+        },
+        "networkSecurityGroups_web_tier_Nsg_externalid": {
+            "value": null
+        }
+    }
+}
