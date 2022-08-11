@@ -1,0 +1,18 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "networkInterfaces_data_vm2206_name": {
+            "value": null
+        },
+        "virtualNetworks_N_tier_vnet_externalid": {
+            "value": null
+        },
+        "loadBalancers_data_tier_Loadbalancer_externalid": {
+            "value": null
+        },
+        "networkSecurityGroups_data_tier_Nsg_externalid": {
+            "value": null
+        }
+    }
+}

@@ -1,0 +1,60 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "networkInterfaces_data_vm2206_name": {
+            "defaultValue": "data-vm2206",
+            "type": "String"
+        },
+        "virtualNetworks_N_tier_vnet_externalid": {
+            "defaultValue": "/subscriptions/4de00a71-c650-4bea-b844-d170c82f70c7/resourceGroups/N-tier-RG/providers/Microsoft.Network/virtualNetworks/N-tier_vnet",
+            "type": "String"
+        },
+        "loadBalancers_data_tier_Loadbalancer_externalid": {
+            "defaultValue": "/subscriptions/4de00a71-c650-4bea-b844-d170c82f70c7/resourceGroups/N-tier-RG/providers/Microsoft.Network/loadBalancers/data-tier-Loadbalancer",
+            "type": "String"
+        },
+        "networkSecurityGroups_data_tier_Nsg_externalid": {
+            "defaultValue": "/subscriptions/4de00a71-c650-4bea-b844-d170c82f70c7/resourceGroups/N-tier-RG/providers/Microsoft.Network/networkSecurityGroups/data-tier-Nsg",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('networkInterfaces_data_vm2206_name')]",
+            "location": "swedencentral",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "192.168.128.5",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[concat(parameters('virtualNetworks_N_tier_vnet_externalid'), '/subnets/Data-tier')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4",
+                            "loadBalancerBackendAddressPools": [
+                                {
+                                    "id": "[concat(parameters('loadBalancers_data_tier_Loadbalancer_externalid'), '/backendAddressPools/data-tier-backend')]"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false,
+                "networkSecurityGroup": {
+                    "id": "[parameters('networkSecurityGroups_data_tier_Nsg_externalid')]"
+                }
+            }
+        }
+    ]
+}
