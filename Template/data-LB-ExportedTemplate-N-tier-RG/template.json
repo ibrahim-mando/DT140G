@@ -1,0 +1,186 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "loadBalancers_data_tier_Loadbalancer_name": {
+            "defaultValue": "data-tier-Loadbalancer",
+            "type": "String"
+        },
+        "virtualNetworks_N_tier_vnet_externalid": {
+            "defaultValue": "/subscriptions/4de00a71-c650-4bea-b844-d170c82f70c7/resourceGroups/N-tier-RG/providers/Microsoft.Network/virtualNetworks/N-tier_vnet",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('loadBalancers_data_tier_Loadbalancer_name')]",
+            "location": "swedencentral",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_data_tier_Loadbalancer_name'), 'data-tier-backend')]"
+            ],
+            "sku": {
+                "name": "Standard",
+                "tier": "Regional"
+            },
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "data-tier-frontend",
+                        "properties": {
+                            "privateIPAddress": "192.168.64.6",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[concat(parameters('virtualNetworks_N_tier_vnet_externalid'), '/subnets/Business-tier')]"
+                            },
+                            "privateIPAddressVersion": "IPv4"
+                        },
+                        "zones": [
+                            "2"
+                        ]
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "data-tier-backend",
+                        "properties": {
+                            "loadBalancerBackendAddresses": [
+                                {
+                                    "name": "N-tier-RG_data-vm1908ipconfig1",
+                                    "properties": {}
+                                },
+                                {
+                                    "name": "N-tier-RG_data-vm2206ipconfig1",
+                                    "properties": {}
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "http",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_data_tier_Loadbalancer_name')), '/frontendIPConfigurations/data-tier-frontend')]"
+                            },
+                            "frontendPort": 80,
+                            "backendPort": 80,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "Tcp",
+                            "enableTcpReset": true,
+                            "loadDistribution": "Default",
+                            "disableOutboundSnat": true,
+                            "backendAddressPool": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_data_tier_Loadbalancer_name'), 'data-tier-backend')]"
+                            },
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_data_tier_Loadbalancer_name')), '/probes/http')]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "rdp",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_data_tier_Loadbalancer_name')), '/frontendIPConfigurations/data-tier-frontend')]"
+                            },
+                            "frontendPort": 3389,
+                            "backendPort": 3389,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "Tcp",
+                            "enableTcpReset": true,
+                            "loadDistribution": "Default",
+                            "disableOutboundSnat": true,
+                            "backendAddressPool": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_data_tier_Loadbalancer_name'), 'data-tier-backend')]"
+                            },
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_data_tier_Loadbalancer_name')), '/probes/rdp')]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "sql",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_data_tier_Loadbalancer_name')), '/frontendIPConfigurations/data-tier-frontend')]"
+                            },
+                            "frontendPort": 1433,
+                            "backendPort": 1433,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "Tcp",
+                            "enableTcpReset": false,
+                            "loadDistribution": "Default",
+                            "disableOutboundSnat": true,
+                            "backendAddressPool": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_data_tier_Loadbalancer_name'), 'data-tier-backend')]"
+                            },
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_data_tier_Loadbalancer_name')), '/probes/sql')]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "http",
+                        "properties": {
+                            "protocol": "Http",
+                            "port": 80,
+                            "requestPath": "/",
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 1
+                        }
+                    },
+                    {
+                        "name": "rdp",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "port": 80,
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 1
+                        }
+                    },
+                    {
+                        "name": "sql",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "port": 80,
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 1
+                        }
+                    }
+                ],
+                "inboundNatRules": [],
+                "outboundRules": [],
+                "inboundNatPools": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/loadBalancers/backendAddressPools",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('loadBalancers_data_tier_Loadbalancer_name'), '/data-tier-backend')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_data_tier_Loadbalancer_name'))]"
+            ],
+            "properties": {
+                "loadBalancerBackendAddresses": [
+                    {
+                        "name": "N-tier-RG_data-vm1908ipconfig1",
+                        "properties": {}
+                    },
+                    {
+                        "name": "N-tier-RG_data-vm2206ipconfig1",
+                        "properties": {}
+                    }
+                ]
+            }
+        }
+    ]
+}
