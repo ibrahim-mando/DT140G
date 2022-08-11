@@ -1,0 +1,18 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachines_web_vm1_name": {
+            "value": null
+        },
+        "disks_web_vm1_OsDisk_1_d5448d008b684800973ae85eaf1ad14f_externalid": {
+            "value": null
+        },
+        "disks_web_vm1_DataDisk_0_externalid": {
+            "value": null
+        },
+        "networkInterfaces_web_vm1818_externalid": {
+            "value": null
+        }
+    }
+}
