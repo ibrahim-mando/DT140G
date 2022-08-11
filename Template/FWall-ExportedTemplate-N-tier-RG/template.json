@@ -1,0 +1,58 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "azureFirewalls_Vnet_Firewall_name": {
+            "defaultValue": "Vnet-Firewall",
+            "type": "String"
+        },
+        "publicIPAddresses_firewall_pip_externalid": {
+            "defaultValue": "/subscriptions/4de00a71-c650-4bea-b844-d170c82f70c7/resourceGroups/N-tier-RG/providers/Microsoft.Network/publicIPAddresses/firewall-pip",
+            "type": "String"
+        },
+        "virtualNetworks_N_tier_vnet_externalid": {
+            "defaultValue": "/subscriptions/4de00a71-c650-4bea-b844-d170c82f70c7/resourceGroups/N-tier-RG/providers/Microsoft.Network/virtualNetworks/N-tier_vnet",
+            "type": "String"
+        },
+        "firewallPolicies_standar_externalid": {
+            "defaultValue": "/subscriptions/4de00a71-c650-4bea-b844-d170c82f70c7/resourceGroups/N-tier-RG/providers/Microsoft.Network/firewallPolicies/standar",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/azureFirewalls",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('azureFirewalls_Vnet_Firewall_name')]",
+            "location": "swedencentral",
+            "properties": {
+                "sku": {
+                    "name": "AZFW_VNet",
+                    "tier": "Standard"
+                },
+                "threatIntelMode": "Alert",
+                "additionalProperties": {},
+                "ipConfigurations": [
+                    {
+                        "name": "firewall-pip",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[parameters('publicIPAddresses_firewall_pip_externalid')]"
+                            },
+                            "subnet": {
+                                "id": "[concat(parameters('virtualNetworks_N_tier_vnet_externalid'), '/subnets/AzureFirewallSubnet')]"
+                            }
+                        }
+                    }
+                ],
+                "networkRuleCollections": [],
+                "applicationRuleCollections": [],
+                "natRuleCollections": [],
+                "firewallPolicy": {
+                    "id": "[parameters('firewallPolicies_standar_externalid')]"
+                }
+            }
+        }
+    ]
+}
