@@ -1,0 +1,15 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "applicationGateways_appGatw_name": {
+            "value": null
+        },
+        "virtualNetworks_N_tier_vnet_externalid": {
+            "value": null
+        },
+        "publicIPAddresses_App_gat_pip_externalid": {
+            "value": null
+        }
+    }
+}

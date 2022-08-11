@@ -1,0 +1,150 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "applicationGateways_appGatw_name": {
+            "defaultValue": "appGatw",
+            "type": "String"
+        },
+        "virtualNetworks_N_tier_vnet_externalid": {
+            "defaultValue": "/subscriptions/4de00a71-c650-4bea-b844-d170c82f70c7/resourceGroups/N-tier-RG/providers/Microsoft.Network/virtualNetworks/N-tier_vnet",
+            "type": "String"
+        },
+        "publicIPAddresses_App_gat_pip_externalid": {
+            "defaultValue": "/subscriptions/4de00a71-c650-4bea-b844-d170c82f70c7/resourceGroups/N-tier-RG/providers/Microsoft.Network/publicIPAddresses/App-gat-pip",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/applicationGateways",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('applicationGateways_appGatw_name')]",
+            "location": "swedencentral",
+            "zones": [
+                "1",
+                "2"
+            ],
+            "properties": {
+                "sku": {
+                    "name": "WAF_v2",
+                    "tier": "WAF_v2"
+                },
+                "gatewayIPConfigurations": [
+                    {
+                        "name": "appGatewayIpConfig",
+                        "properties": {
+                            "subnet": {
+                                "id": "[concat(parameters('virtualNetworks_N_tier_vnet_externalid'), '/subnets/ApplicationGatewaySubnet')]"
+                            }
+                        }
+                    }
+                ],
+                "sslCertificates": [],
+                "trustedRootCertificates": [],
+                "trustedClientCertificates": [],
+                "sslProfiles": [],
+                "frontendIPConfigurations": [
+                    {
+                        "name": "appGwPublicFrontendIp",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[parameters('publicIPAddresses_App_gat_pip_externalid')]"
+                            }
+                        }
+                    }
+                ],
+                "frontendPorts": [
+                    {
+                        "name": "port_80",
+                        "properties": {
+                            "port": 80
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "app-gat-backned",
+                        "properties": {
+                            "backendAddresses": []
+                        }
+                    }
+                ],
+                "backendHttpSettingsCollection": [
+                    {
+                        "name": "backen-seting",
+                        "properties": {
+                            "port": 80,
+                            "protocol": "Http",
+                            "cookieBasedAffinity": "Enabled",
+                            "connectionDraining": {
+                                "enabled": true,
+                                "drainTimeoutInSec": 60
+                            },
+                            "pickHostNameFromBackendAddress": false,
+                            "affinityCookieName": "ApplicationGatewayAffinity",
+                            "requestTimeout": 20
+                        }
+                    }
+                ],
+                "httpListeners": [
+                    {
+                        "name": "http-litsenter",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_appGatw_name')), '/frontendIPConfigurations/appGwPublicFrontendIp')]"
+                            },
+                            "frontendPort": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_appGatw_name')), '/frontendPorts/port_80')]"
+                            },
+                            "protocol": "Http",
+                            "hostNames": [],
+                            "requireServerNameIndication": false
+                        }
+                    }
+                ],
+                "urlPathMaps": [],
+                "requestRoutingRules": [
+                    {
+                        "name": "http-rule",
+                        "properties": {
+                            "ruleType": "Basic",
+                            "priority": 100,
+                            "httpListener": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_appGatw_name')), '/httpListeners/http-litsenter')]"
+                            },
+                            "backendAddressPool": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_appGatw_name')), '/backendAddressPools/app-gat-backned')]"
+                            },
+                            "backendHttpSettings": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', parameters('applicationGateways_appGatw_name')), '/backendHttpSettingsCollection/backen-seting')]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [],
+                "rewriteRuleSets": [],
+                "redirectConfigurations": [],
+                "privateLinkConfigurations": [],
+                "webApplicationFirewallConfiguration": {
+                    "enabled": true,
+                    "firewallMode": "Detection",
+                    "ruleSetType": "OWASP",
+                    "ruleSetVersion": "3.0",
+                    "disabledRuleGroups": [],
+                    "exclusions": [],
+                    "requestBodyCheck": true,
+                    "maxRequestBodySizeInKb": 128,
+                    "fileUploadLimitInMb": 100
+                },
+                "enableHttp2": true,
+                "autoscaleConfiguration": {
+                    "minCapacity": 2,
+                    "maxCapacity": 10
+                }
+            }
+        }
+    ]
+}
