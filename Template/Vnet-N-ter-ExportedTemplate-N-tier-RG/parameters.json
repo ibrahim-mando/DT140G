@@ -1,0 +1,21 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualNetworks_N_tier_vnet_name": {
+            "value": null
+        },
+        "networkSecurityGroups_data_tier_Nsg_externalid": {
+            "value": null
+        },
+        "networkSecurityGroups_Business_tier_Nsg_externalid": {
+            "value": null
+        },
+        "networkSecurityGroups_web_tier_Nsg_externalid": {
+            "value": null
+        },
+        "ddosProtectionPlans_ddos_protection_plan_externalid": {
+            "value": null
+        }
+    }
+}

@@ -1,0 +1,215 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualNetworks_N_tier_vnet_name": {
+            "defaultValue": "N-tier_vnet",
+            "type": "String"
+        },
+        "networkSecurityGroups_data_tier_Nsg_externalid": {
+            "defaultValue": "/subscriptions/4de00a71-c650-4bea-b844-d170c82f70c7/resourceGroups/N-tier-RG/providers/Microsoft.Network/networkSecurityGroups/data-tier-Nsg",
+            "type": "String"
+        },
+        "networkSecurityGroups_Business_tier_Nsg_externalid": {
+            "defaultValue": "/subscriptions/4de00a71-c650-4bea-b844-d170c82f70c7/resourceGroups/N-tier-RG/providers/Microsoft.Network/networkSecurityGroups/Business-tier-Nsg",
+            "type": "String"
+        },
+        "networkSecurityGroups_web_tier_Nsg_externalid": {
+            "defaultValue": "/subscriptions/4de00a71-c650-4bea-b844-d170c82f70c7/resourceGroups/N-tier-RG/providers/Microsoft.Network/networkSecurityGroups/web-tier-Nsg",
+            "type": "String"
+        },
+        "ddosProtectionPlans_ddos_protection_plan_externalid": {
+            "defaultValue": "/subscriptions/4de00a71-c650-4bea-b844-d170c82f70c7/resourceGroups/N-tier-RG/providers/Microsoft.Network/ddosProtectionPlans/ddos-protection-plan",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-11-01",
+            "name": "[parameters('virtualNetworks_N_tier_vnet_name')]",
+            "location": "swedencentral",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "192.168.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "ApplicationGatewaySubnet",
+                        "properties": {
+                            "addressPrefix": "192.168.208.0/20",
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "AzureFirewallSubnet",
+                        "properties": {
+                            "addressPrefix": "192.168.224.0/20",
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "Data-tier",
+                        "properties": {
+                            "addressPrefix": "192.168.128.0/18",
+                            "networkSecurityGroup": {
+                                "id": "[parameters('networkSecurityGroups_data_tier_Nsg_externalid')]"
+                            },
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "Business-tier",
+                        "properties": {
+                            "addressPrefix": "192.168.64.0/18",
+                            "networkSecurityGroup": {
+                                "id": "[parameters('networkSecurityGroups_Business_tier_Nsg_externalid')]"
+                            },
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "Web-tier",
+                        "properties": {
+                            "addressPrefix": "192.168.0.0/18",
+                            "networkSecurityGroup": {
+                                "id": "[parameters('networkSecurityGroups_web_tier_Nsg_externalid')]"
+                            },
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "AzureBastionSubnet",
+                        "properties": {
+                            "addressPrefix": "192.168.240.0/26",
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Disabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": true,
+                "ddosProtectionPlan": {
+                    "id": "[parameters('ddosProtectionPlans_ddos_protection_plan_externalid')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('virtualNetworks_N_tier_vnet_name'), '/ApplicationGatewaySubnet')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_N_tier_vnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "192.168.208.0/20",
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Disabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('virtualNetworks_N_tier_vnet_name'), '/AzureBastionSubnet')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_N_tier_vnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "192.168.240.0/26",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Disabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('virtualNetworks_N_tier_vnet_name'), '/AzureFirewallSubnet')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_N_tier_vnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "192.168.224.0/20",
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Disabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('virtualNetworks_N_tier_vnet_name'), '/Business-tier')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_N_tier_vnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "192.168.64.0/18",
+                "networkSecurityGroup": {
+                    "id": "[parameters('networkSecurityGroups_Business_tier_Nsg_externalid')]"
+                },
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Disabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('virtualNetworks_N_tier_vnet_name'), '/Data-tier')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_N_tier_vnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "192.168.128.0/18",
+                "networkSecurityGroup": {
+                    "id": "[parameters('networkSecurityGroups_data_tier_Nsg_externalid')]"
+                },
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Disabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('virtualNetworks_N_tier_vnet_name'), '/Web-tier')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_N_tier_vnet_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "192.168.0.0/18",
+                "networkSecurityGroup": {
+                    "id": "[parameters('networkSecurityGroups_web_tier_Nsg_externalid')]"
+                },
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Disabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        }
+    ]
+}
